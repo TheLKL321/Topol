@@ -7,28 +7,36 @@
 exception Cykliczne;;
 
 (*  Typ grafu, lista sąsiedztwa
-    (node, lista połączeń) *)
+    (node n, lista node'ów do których node n ma skierowaną krawędź) *)
 type 'a graf = ('a * 'a list) list
 
-(*  Zwraca parę (mapa1, mapa2), gdzie mapa1 to mapa list sąsiadów wierzchołka 
-    grafu g kluczowana wierzchołkami, a mapa2 to mapa liczby sąsiadów 
-    wierzchołka kluczowana wierzchołkami *)
+(*  Zwraca mapę list node'ów do których dany node ma skierowaną krawędź, 
+    kluczowaną node'ami. W każdej takiej liście nie występują duplikaty *)
 let kartograf g =
-  let rec loop map indegree = function
-    | [] -> (map, indegree)
-    | (h1, h2) :: t -> 
-      let rec loop2 tempIndegree = function
-        | [] -> tempIndegree
-        | th :: tt -> 
-          loop2 (add th (find th tempIndegree + 1) tempIndegree) tt
-      in loop (add h1 h2 map) (loop2 indegree h2) t
-  in loop (empty) (empty) g
+  let mapa = ref empty
+  in let f (node, lis) = 
+    let lista = 
+      if mem node !mapa then 
+        lis @ (find node !mapa)
+      else lis
+    in mapa := add node lista !mapa;
+  in 
+    List.iter f g;
+    let uniq l =
+      let tempMapa = ref empty 
+      in let rec loop = function
+          | [] -> ()
+          | h :: t -> 
+            tempMapa := add h h !tempMapa;
+            loop t
+        in loop l;
+        fold (fun k a -> k :: a) !tempMapa []
+    in map uniq !mapa
+
 
 (*  Dla danego grafu[(a_1,[a_11;...;a_1n]); ...; (a_m,[a_m1;...;a_mk])] zwraca 
     graf w ktorym kazdy z elementow a_i oraz a_ij wystepuje dokladnie raz i 
     ktory jest uporzadkowany w taki sposob, ze kazdy element a_i jest przed
     kazdym z elementow a_i1 ... a_il *)
-let topol g = 
-  let (map, indegree) = kartograf g
-  in
+let topol g = 42
 ;;
