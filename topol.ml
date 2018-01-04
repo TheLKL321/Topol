@@ -11,7 +11,8 @@ exception Cykliczne;;
 type 'a graf = ('a * 'a list) list
 
 (*  Zwraca mapę list node'ów do których dany node ma skierowaną krawędź, 
-    kluczowaną node'ami. W każdej takiej liście nie występują duplikaty *)
+    kluczowaną node'ami. W żadnej z takich list nie występują duplikaty, oraz 
+    każdy node grafu znajduje się w uzyskanej mapie *)
 let kartograf g =
   let mapa = ref empty
   in let f (node, lis) = 
@@ -30,6 +31,7 @@ let kartograf g =
             tempMapa := add h h !tempMapa;
             loop t
         in loop l;
+        (*  dla każdego unikatowego sąsiada dodaj go jako node jeśli jeszcze go nie ma *)
         fold (fun k a -> k :: a) !tempMapa []
     in map uniq !mapa
 
