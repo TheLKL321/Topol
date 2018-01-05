@@ -39,7 +39,7 @@ let kartograf g =
 let inDegrees m =
   let indegree = ref empty
   in let f k lis = 
-    indegree := add k 0 !indegree;
+    if not (mem k !indegree) then indegree := add k 0 !indegree;
     let filler x = 
       try
         indegree := add x (find x !indegree + 1) !indegree;
