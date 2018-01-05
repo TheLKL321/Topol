@@ -45,14 +45,45 @@ let inDegrees m =
         indegree := add x (find x !indegree + 1) !indegree;
       with
         | Not_found -> indegree := add x 1 !indegree;
-        | _ -> failwith "Unknown"
+        | _ -> failwith "Unknown inDegrees filler"
     in List.iter filler lis;
   in iter f m;
-  indegree
+  !indegree
 
 (*  Dla danego grafu[(a_1,[a_11;...;a_1n]); ...; (a_m,[a_m1;...;a_mk])] zwraca 
     graf w ktorym kazdy z elementow a_i oraz a_ij wystepuje dokladnie raz i 
     ktory jest uporzadkowany w taki sposob, ze kazdy element a_i jest przed
     kazdym z elementow a_i1 ... a_il *)
 let topol g = 
+  let queue = ref []
+  and mapa = ref (kartograf g)
+  and result = ref []
+  in 
+    let indegree = ref (inDegrees !mapa)
+    (*  Wypełnianie kolejki node'ami do których nie ma skierowanych krawędzi *)
+    in 
+      let f1 k v = 
+        if v = 0 then queue := k :: !queue
+      (*  Przenoszenie danego node'a z indegree do listy wynikowej i usuwanie
+          jego krawędzi *)
+      and f2 x = 
+        result := x :: !result;
+        indegree := remove x !indegree;
+        (*  Usuwanie krawędzi node'a *)
+        try
+          let f21 y = 
+            indegree := add y (find y !indegree - 1) !indegree
+          in 
+            List.iter f21 (find x !mapa)
+        with
+          | Not_found -> ()
+          | _ -> failwith "Unknown topol f2"
+      in 
+        while not (is_empty !indegree) do
+          iter f1 !indegree;
+          if !queue = [] then raise Cykliczne;
+          List.iter f2 !queue;
+          queue := [];
+        done;
+        List.rev !result
 ;;
