@@ -16,17 +16,17 @@ let validate input =
   let output = input |> topol in
   let computation = Sys.time() -. time in
   (*graph of connections for given value returns values that should be behind*)
-  let graph = List.fold_left (fun map (v, dep) -> PMap.add v dep map) PMap.empty input in
+  let graph = List.fold_left (fun map (v, dep) -> add v dep map) empty input in
   let rec folder ~setvisited (result, visited) value =
-    let newresult = result && (not (PMap.mem value visited)) in
+    let newresult = result && (not (mem value visited)) in
     if setvisited && newresult then
-      let dependencies = try PMap.find value graph with | Not_found -> [] in
-      let newvisited = PMap.add value true visited in
+      let dependencies = try find value graph with | Not_found -> [] in
+      let newvisited = add value true visited in
       List.fold_left (folder ~setvisited:false) (newresult, newvisited) dependencies
     else
       (newresult, visited)
   in
-  computation, fst (List.fold_left (folder ~setvisited:true) (true, PMap.empty) output)
+  computation, fst (List.fold_left (folder ~setvisited:true) (true, empty) output)
 
 let () =
   Printf.printf "Podaj seed dla testów \n%!";
