@@ -1,7 +1,7 @@
 (*  Autor: Łukasz Zarębski
-    Code Review:  *)
+    Code Review: Jakub Kowalski *)
 
-(*open PMap;; TODO*)
+open PMap;;
 
 (*  Zwracany w momencie gdy graf okaże się cykliczny *)
 exception Cykliczne;;
@@ -16,11 +16,9 @@ type 'a graf = ('a * 'a list) list
 let kartograf g =
   let mapa = ref empty
   in let f (node, lis) = 
-    let lista = 
       if mem node !mapa then 
-        lis @ (find node !mapa)
-      else lis
-    in mapa := add node lista !mapa;
+        mapa := add node (lis @ (find node !mapa)) !mapa
+      else mapa := add node lis !mapa
   in 
     List.iter f g;
     let uniq l =
