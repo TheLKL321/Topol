@@ -25,7 +25,7 @@ let test_cyclic g =
   with Cykliczne -> true
  
 ;;
-     
+    
 print_endline "Acyclic correctness tests...";;
      
 let g = [
@@ -474,7 +474,7 @@ let g = shuffle_list (gen_random int_label 100000 1000000);;
 assert(test g (topol g));;
  
 print_endline "OK";;
- 
+
 print_endline "Bigger int cyclic performance tests... ";;
  
 let g = shuffle_list (gen_loop int_label 90000);;

@@ -1,7 +1,7 @@
 (*  Autor: Łukasz Zarębski
     Code Review: Jakub Kowalski *)
 
-open PMap;;
+(*open PMap;;*)
 
 (*  Zwracany w momencie gdy graf okaże się cykliczny *)
 exception Cykliczne;;
@@ -54,34 +54,40 @@ let inDegrees m =
     kazdym z elementow a_i1 ... a_il *)
 let topol g = 
   let queue = ref []
+  and queueTemp = ref []
   and mapa = ref (kartograf g)
   and result = ref []
   in 
     let indegree = ref (inDegrees !mapa)
-    (*  Wypełnianie kolejki node'ami do których nie ma skierowanych krawędzi *)
     in 
+      (*  Wypełnianie kolejki node'ami do których nie ma skierowanych krawędzi*)
       let f1 k v = 
         if v = 0 then queue := k :: !queue
       (*  Przenoszenie danego node'a z indegree do listy wynikowej i usuwanie
-          jego krawędzi *)
+          jego krawędzi. Jeśli unsunięta zostanie ostatnia krawędź node'a, jest 
+          on dodawany do kolejki tymczasowej *)
       and f2 x = 
         result := x :: !result;
         indegree := remove x !indegree;
-        (*  Usuwanie krawędzi node'a *)
         try
+          (*  Usuwanie krawędzi/dodawanie do kolejki tymczasowej *)
           let f21 y = 
-            indegree := add y (find y !indegree - 1) !indegree
+            let value = find y !indegree - 1
+            in
+              if value = 0 then queueTemp := y :: !queueTemp
+              else indegree := add y value !indegree
           in 
             List.iter f21 (find x !mapa)
         with
           | Not_found -> ()
           | _ -> failwith "Unknown topol f2"
       in 
+        iter f1 !indegree;
         while not (is_empty !indegree) do
-          iter f1 !indegree;
           if !queue = [] then raise Cykliczne;
           List.iter f2 !queue;
-          queue := [];
+          queue := !queueTemp;
+          queueTemp := [];
         done;
         List.rev !result
 ;;
