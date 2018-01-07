@@ -1,7 +1,7 @@
 (*  Autor: Łukasz Zarębski
     Code Review: Jakub Kowalski *)
 
-(*open PMap;;*)
+open PMap;;
 
 (*  Zwracany w momencie gdy graf okaże się cykliczny *)
 exception Cykliczne;;
