@@ -10,45 +10,54 @@ exception Cykliczne;;
     (node n, lista node'ów do których node n ma skierowaną krawędź) *)
 type 'a graf = ('a * 'a list) list
 
+(*  Dla listy l zwraca listę zawierającą te same elementy co l, lecz usuwa
+    duplikaty. Kolejność elementów nie jest określona *)
+let uniq l =
+  let tempMapa = ref empty 
+  in 
+    let rec loop = function
+      | [] -> ()
+      | h :: t -> 
+        tempMapa := add h h !tempMapa;
+        loop t
+    in 
+      loop l;
+      fold (fun k a -> k :: a) !tempMapa []
+
 (*  Zwraca mapę list node'ów do których dany node ma skierowaną krawędź, 
     kluczowaną node'ami. W żadnej z takich list nie występują duplikaty, lecz 
     niekoniecznie każdy element listy znajduje się w uzyskanej mapie jako node*)
 let kartograf g =
   let mapa = ref empty
-  in let f (node, lis) = 
+  in 
+    let f (node, lis) = 
       if mem node !mapa then 
         mapa := add node (lis @ (find node !mapa)) !mapa
-      else mapa := add node lis !mapa
-  in 
-    List.iter f g;
-    let uniq l =
-      let tempMapa = ref empty 
-      in let rec loop = function
-          | [] -> ()
-          | h :: t -> 
-            tempMapa := add h h !tempMapa;
-            loop t
-        in loop l;
-        fold (fun k a -> k :: a) !tempMapa []
-    in map uniq !mapa
+      else 
+        mapa := add node lis !mapa
+    in 
+      List.iter f g;
+      map uniq !mapa
 
 (*  Tworzy mapę kluczowaną node'ami, zawierającą liczbę krawędzi skierowanych
     do danego node'a *)
 let inDegrees m =
   let indegree = ref empty
-  in let f k lis = 
-    if not (mem k !indegree) then indegree := add k 0 !indegree;
-    let filler x = 
-      try
-        indegree := add x (find x !indegree + 1) !indegree;
-      with
-        | Not_found -> indegree := add x 1 !indegree;
-        | _ -> failwith "Unknown inDegrees filler"
-    in List.iter filler lis;
-  in iter f m;
-  !indegree
+  in 
+    let f k lis = 
+      if not (mem k !indegree) then indegree := add k 0 !indegree;
+      let filler x = 
+        try
+          indegree := add x (find x !indegree + 1) !indegree;
+        with
+          | Not_found -> indegree := add x 1 !indegree;
+          | _ -> failwith "Unknown inDegrees filler"
+      in List.iter filler lis;
+    in 
+      iter f m;
+      !indegree
 
-(*  Dla danego grafu[(a_1,[a_11;...;a_1n]); ...; (a_m,[a_m1;...;a_mk])] zwraca 
+(*  Dla danego grafu [(a_1,[a_11;...;a_1n]); ...; (a_m,[a_m1;...;a_mk])] zwraca 
     graf w ktorym kazdy z elementow a_i oraz a_ij wystepuje dokladnie raz i 
     ktory jest uporzadkowany w taki sposob, ze kazdy element a_i jest przed
     kazdym z elementow a_i1 ... a_il *)
